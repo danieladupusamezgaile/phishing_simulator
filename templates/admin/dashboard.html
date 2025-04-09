@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phishing Simulator - Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phishing Campaign Simulator</h1>
+        <a href="/admin/new_campaign" class="button">Create New Campaign</a>
+        
+        <h2>Active Campaigns</h2>
+        <table>
+            <tr>
+                <th>Campaign Name</th>
+                <th>Description</th>
+                <th>Created</th>
+                <th>Targets</th>
+                <th>Open Rate</th>
+                <th>Click Rate</th>
+                <th>Success Rate</th>
+                <th>Actions</th>
+            </tr>
+            {% for campaign in campaigns %}
+            <tr>
+                <td>{{ campaign.name }}</td>
+                <td>{{ campaign.description }}</td>
+                <td>{{ campaign.created_at }}</td>
+                <td>{{ campaign.targets }}</td>
+                <td>{{ campaign.open_rate }}%</td>
+                <td>{{ campaign.click_rate }}%</td>
+                <td>{{ campaign.success_rate }}%</td>
+                <td>
+                    <a href="/admin/view_campaign/{{ campaign.id }}">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

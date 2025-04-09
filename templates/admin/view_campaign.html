@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Campaign</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; text-align: left; border: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status-success { background-color: green; }
+        .status-pending { background-color: orange; }
+        .status-none { background-color: gray; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Campaign: {{ campaign.name }}</h1>
+        <p><strong>Description:</strong> {{ campaign.description }}</p>
+        <p><strong>Created:</strong> {{ campaign.created_at }}</p>
+        
+        <a href="/admin" class="button">Back to Dashboard</a>
+        <a href="/admin/add_target/{{ campaign.id }}" class="button">Add Target</a>
+        
+        <h2>Targets</h2>
+        {% if targets %}
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            {% for target in targets %}
+            <tr>
+                <td>{{ target.name }}</td>
+                <td>{{ target.email }}</td>
+                <td>{{ target.department }}</td>
+                <td>
+                    {% set opened = false %}
+                    {% set clicked = false %}
+                    {% set submitted = false %}
+                    
+                    {% for event in target.events %}
+                        {% if event.event_type == 'email_opened' %}
+                            {% set opened = true %}
+                        {% elif event.event_type == 'link_clicked' %}
+                            {% set clicked = true %}
+                        {% elif event.event_type == 'credentials_entered' %}
+                            {% set submitted = true %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if submitted %}
+                        <span class="status status-success"></span> Credentials Submitted
+                    {% elif clicked %}
+                        <span class="status status-pending"></span> Link Clicked
+                    {% elif opened %}
+                        <span class="status status-pending"></span> Email Opened
+                    {% else %}
+                        <span class="status status-none"></span> Pending
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/admin/send_email/{{ target.id }}">Send Email</a>
+                    |
+                    <a href="/login/{{ target.unique_token }}" target="_blank">Test Link</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No targets added yet. Add targets to begin the campaign.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

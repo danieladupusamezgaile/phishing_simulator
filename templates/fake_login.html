@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign in</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .login-container { 
+            width: 300px; 
+            margin: 100px auto; 
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        input { width: 100%; padding: 10px; margin: 10px 0; }
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            background-color: #0066cc; 
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Sign in to your account</h2>
+        <form action="/submit_credentials/{{ token }}" method="post">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Sign In</button>
+        </form>
+    </div>
+</body>
+</html>
