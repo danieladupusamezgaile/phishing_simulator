@@ -87,7 +87,7 @@ def add_target(campaign_id, email, name, department):
     return target_id, unique_token
 
 # Email sending (simplified - would need actual SMTP configuration)
-def send_phishing_email(target_id, template_name):
+def send_phishing_email(target_id, template_name=None):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
@@ -103,17 +103,67 @@ def send_phishing_email(target_id, template_name):
         return False
     
     email, name, token, template = target_data
-    tracking_pixel = f"<img src='http://yourserver.com/track/{token}/open' width='1' height='1' />"
-    phishing_link = f"http://yourserver.com/login/{token}"
+    tracking_pixel = f"<img src='http://localhost:5000/track/{token}/open' width='1' height='1' />"
+    phishing_link = f"http://localhost:5000/login/{token}"
     
     # Replace placeholders in template
     email_content = template.replace("{{name}}", name)
     email_content = email_content.replace("{{phishing_link}}", phishing_link)
     email_content += tracking_pixel
+
+    # === ACTUAL EMAIL SENDING ===
+    sender_email = "datasectesting@outlook.com"         # Replace with your real email
+    sender_password = "datasec@testing"    # Use an app password or store it safely
+    smtp_server = "smtp.office365.com"
+    smtp_port = 587
+
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = email
+        msg["Subject"] = "Important Security Notification"
+        msg.attach(MIMEText(email_content, "html"))
+
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+
+        print(f"Email sent to {email}")
+        return True
+
+    except Exception as e:
+        print(f"Failed to send email to {email}: {e}")
+        return False
+
+# def send_phishing_email(target_id, template_name):
+#     conn = sqlite3.connect(DB_PATH)
+#     cursor = conn.cursor()
     
-    # Send email (placeholder - implement with actual SMTP)
-    print(f"Would send email to {email} with token {token}")
-    return True
+#     cursor.execute(
+#         "SELECT t.email, t.name, t.unique_token, c.template FROM targets t JOIN campaigns c ON t.campaign_id = c.id WHERE t.id = ?",
+#         (target_id,)
+#     )
+    
+#     target_data = cursor.fetchone()
+#     conn.close()
+    
+#     if not target_data:
+#         return False
+    
+#     email, name, token, template = target_data
+#     tracking_pixel = f"<img src='http://yourserver.com/track/{token}/open' width='1' height='1' />"
+#     phishing_link = f"http://yourserver.com/login/{token}"
+    
+#     # Replace placeholders in template
+#     email_content = template.replace("{{name}}", name)
+#     email_content = email_content.replace("{{phishing_link}}", phishing_link)
+#     email_content += tracking_pixel
+    
+#     # Send email (placeholder - implement with actual SMTP)
+#     print(f"Would send email to {email} with token {token}")
+#     return True
 
 # Tracking endpoints
 @app.route('/track/<token>/open')
@@ -218,7 +268,7 @@ def view_campaign(campaign_id):
     return render_template('admin/view_campaign.html', campaign=campaign, targets=targets)
 
 @app.route('/admin/add_target/<campaign_id>', methods=['GET', 'POST'])
-def add_target(campaign_id):
+def add_target_db(campaign_id):
     if request.method == 'POST':
         email = request.form.get('email')
         name = request.form.get('name')
